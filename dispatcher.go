@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 type Event interface {
 	EventName() string
 }
@@ -9,10 +11,13 @@ type EventHandler interface {
 }
 
 type Dispatcher struct {
+	mu       sync.Mutex
 	handlers map[string][]EventHandler
 }
 
 func (d *Dispatcher) Subscribe(event Event, handler EventHandler) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 	d.handlers[event.EventName()] = append(d.handlers[event.EventName()], handler)
 }
 
